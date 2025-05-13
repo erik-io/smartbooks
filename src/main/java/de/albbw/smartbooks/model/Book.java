@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * Die Klasse Book beschreibt ein Buchobjekt mit verschiedenen Attributen sowie Methoden
  * zum Arbeiten mit diesen Attributen.
- *
+ * <p>
  * Diese Klasse wird mit JPA-Annotations verwendet, um eine Entität für
  * die persistente Speicherung eines Buches in einer relationalen Datenbank zu definieren.
  */
@@ -36,7 +36,7 @@ public class Book {
 
     /**
      * Der Status eines Lesevorgangs.
-     *
+     * <p>
      * Dieser Wert gibt an, in welchem Zustand sich ein Lesevorgang befindet.
      * Mögliche Werte sind:
      * - READ: Das Lesen ist abgeschlossen.
@@ -200,9 +200,9 @@ public class Book {
      * Gibt eine textuelle Darstellung des Buchobjekts zurück.
      *
      * @return Eine String-Darstellung des Buchobjekts, die die Werte der Eigenschaften
-     *         wie ID, ISBN, Titel, Autor, Genre, Veröffentlichungsjahr, Verlag,
-     *         Seitenanzahl, URL des Titelbildes, Status, Quelle sowie Zeitstempel
-     *         für API-Überprüfung und Datenaktualisierung enthält.
+     * wie ID, ISBN, Titel, Autor, Genre, Veröffentlichungsjahr, Verlag,
+     * Seitenanzahl, URL des Titelbildes, Status, Quelle sowie Zeitstempel
+     * für API-Überprüfung und Datenaktualisierung enthält.
      */
     @Override
     public String toString() {
