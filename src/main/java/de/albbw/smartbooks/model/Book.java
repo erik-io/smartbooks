@@ -1,6 +1,7 @@
 package de.albbw.smartbooks.model;
 
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -13,6 +14,10 @@ import java.util.Objects;
  * Diese Klasse wird mit JPA-Annotations verwendet, um eine Entität für
  * die persistente Speicherung eines Buches in einer relationalen Datenbank zu definieren.
  */
+@Setter // Generiert Setter-Methoden für alle Felder
+@Getter // Generiert Getter-Methoden für alle Felder
+@NoArgsConstructor // Generiert einen Standardkonstruktor ohne Parameter
+@AllArgsConstructor // Generiert einen Konstruktor mit allen Feldern als Parameter
 @Entity
 @Table(name = "books")
 public class Book {
@@ -72,129 +77,6 @@ public class Book {
      * Diese Variable dient zur Nachverfolgung der Aktualität der abgerufenen Daten.
      */
     private LocalDateTime apiDataUpdateTimestamp;
-
-    public Book() {
-    }
-
-    public Book(Long id, String isbn, String title, String author, String genre, Integer publicationYear, String publisher, Integer pageCount, String coverImageUrl, ReadingStatus status, DataSource source, LocalDateTime apiCheckTimestamp, LocalDateTime apiDataUpdateTimestamp) {
-        this.id = id;
-        this.isbn = isbn;
-        this.title = title;
-        this.author = author;
-        this.genre = genre;
-        this.publicationYear = publicationYear;
-        this.publisher = publisher;
-        this.pageCount = pageCount;
-        this.coverImageUrl = coverImageUrl;
-        this.status = status;
-        this.source = source;
-        this.apiCheckTimestamp = apiCheckTimestamp;
-        this.apiDataUpdateTimestamp = apiDataUpdateTimestamp;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getIsbn() {
-        return isbn;
-    }
-
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public String getGenre() {
-        return genre;
-    }
-
-    public void setGenre(String genre) {
-        this.genre = genre;
-    }
-
-    public Integer getPublicationYear() {
-        return publicationYear;
-    }
-
-    public void setPublicationYear(Integer publicationYear) {
-        this.publicationYear = publicationYear;
-    }
-
-    public String getPublisher() {
-        return publisher;
-    }
-
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
-    }
-
-    public Integer getPageCount() {
-        return pageCount;
-    }
-
-    public void setPageCount(Integer pageCount) {
-        this.pageCount = pageCount;
-    }
-
-    public String getCoverImageUrl() {
-        return coverImageUrl;
-    }
-
-    public void setCoverImageUrl(String coverImageUrl) {
-        this.coverImageUrl = coverImageUrl;
-    }
-
-    public ReadingStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(ReadingStatus status) {
-        this.status = status;
-    }
-
-    public DataSource getSource() {
-        return source;
-    }
-
-    public void setSource(DataSource source) {
-        this.source = source;
-    }
-
-    public LocalDateTime getApiCheckTimestamp() {
-        return apiCheckTimestamp;
-    }
-
-    public void setApiCheckTimestamp(LocalDateTime apiCheckTimestamp) {
-        this.apiCheckTimestamp = apiCheckTimestamp;
-    }
-
-    public LocalDateTime getApiDataUpdateTimestamp() {
-        return apiDataUpdateTimestamp;
-    }
-
-    public void setApiDataUpdateTimestamp(LocalDateTime apiDataUpdateTimestamp) {
-        this.apiDataUpdateTimestamp = apiDataUpdateTimestamp;
-    }
 
     /**
      * Gibt eine textuelle Darstellung des Buchobjekts zurück.
