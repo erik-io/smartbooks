@@ -44,9 +44,23 @@ public class BookService {
      */
     @Transactional
     public Book saveBook(Book book) {
+        if (book.getIsbn() == null || book.getIsbn().trim().isEmpty()) {
+            throw new IllegalArgumentException("ISBN of book cannot be null or empty.");
+        }
+
         if (bookRepository.existsByIsbn(book.getIsbn())) {
             throw new IllegalArgumentException("Book with ISBN " + book.getIsbn() + " already exists.");
         }
+
+        if (book.getSource() == null) {
+            book.setSource(DataSource.UNKNOWN);
+        }
+
+        if (book.getStatus() == null) {
+            book.setStatus(ReadingStatus.UNKNOWN);
+        }
+
+        book.setId(null);
         return bookRepository.save(book);
     }
 
@@ -79,6 +93,9 @@ public class BookService {
      */
     @Transactional
     public void deleteBookByIsbn(String isbn) {
+        if (isbn == null || isbn.trim().isEmpty()) {
+            throw new IllegalArgumentException("ISBN of book cannot be null or empty.");
+        }
         Optional<Book> book = bookRepository.findByIsbn(isbn);
         if (book.isPresent()) {
             bookRepository.deleteByIsbn(isbn);
