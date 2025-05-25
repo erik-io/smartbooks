@@ -3,6 +3,7 @@ package de.albbw.smartbooks.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.albbw.smartbooks.model.Book;
+import de.albbw.smartbooks.model.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -11,8 +12,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import static de.albbw.smartbooks.model.DataSource.JSON;
 
 /**
  * Diese Service-Klasse ermöglicht das Importieren von Buchdaten aus einer JSON-Datei
@@ -87,24 +86,7 @@ public class JsonImportService {
             // jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class) erstellt die notwendige Typinformation (List<Book>) für Jackson.
             List<Book> listOfBooks = jsonMapper.treeToValue(booksNode, jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
 
-            for (Book book : listOfBooks) {
-                if (book.getIsbn() == null) {
-                    System.out.println(book.getTitle() + " has no ISBN. Skipping import of book.");
-                    continue;
-                }
-
-                bookService.findByIsbn(book.getIsbn()).ifPresentOrElse(
-                        existingBook -> {
-                            System.out.println("\"" + book.getTitle() + "\" (ISBN: " + book.getIsbn() + ") already exists. Skipping import of book.");
-                        },
-                        () -> {
-                            book.setId(null);
-                            book.setSource(JSON);
-                            bookService.saveBook(book);
-                            System.out.println("Importing " + book.getTitle() + " (ISBN: " + book.getIsbn() + ") into database.");
-                        }
-                );
-            }
+            bookService.processAndSaveImportedBooks(listOfBooks, DataSource.JSON);
         } catch (IOException e) {
             log.error("Error while reading JSON file: {}", e.getMessage());
         } catch (Exception e) {

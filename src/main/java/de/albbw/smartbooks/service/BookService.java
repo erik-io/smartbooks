@@ -1,10 +1,13 @@
 package de.albbw.smartbooks.service;
 
 import de.albbw.smartbooks.model.Book;
+import de.albbw.smartbooks.model.DataSource;
 import de.albbw.smartbooks.model.ReadingStatus;
 import de.albbw.smartbooks.repository.BookRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,7 @@ import java.util.Optional;
  * bereitgestellt, um die Testbarkeit und Modularität zu verbessern.
  */
 @Service
+@Slf4j
 public class BookService {
     private final BookRepository bookRepository;
 
@@ -138,7 +142,6 @@ public class BookService {
         return bookRepository.findByGenre(genre);
     }
 
-
     /**
      * Findet alle Bücher, die von einem bestimmten Autor geschrieben wurden.
      *
@@ -147,5 +150,45 @@ public class BookService {
      */
     public List<Book> findBooksByAuthor(String author) {
         return bookRepository.findByAuthor(author);
+    }
+
+    /**
+     * Verarbeitet und speichert eine Liste importierter Bücher in der Datenbank, sofern sie eine gültige ISBN besitzen.
+     * Bereits existierende Bücher (basierend auf ISBN) werden übersprungen.
+     *
+     * @param listOfBooks die Liste der zu importierenden Bücher; Null- oder leere Listen werden ignoriert
+     * @param dataSource  die Quelle, aus der die Bücher importiert wurden; wird für Protokollierungszwecke verwendet
+     */
+    @Transactional
+    public void processAndSaveImportedBooks(List<Book> listOfBooks, DataSource dataSource) {
+        if (listOfBooks == null || listOfBooks.isEmpty()) {
+            log.info("'{}' contains no books to import.", dataSource);
+            return;
+        }
+
+        for (Book book : listOfBooks) {
+            if (book.getIsbn() == null) {
+                log.warn("[{}] '{}' has no ISBN. Skipping import of book.", dataSource, book.getTitle());
+                continue;
+            }
+
+            findByIsbn(book.getIsbn()).ifPresentOrElse(
+                    existingBook -> {
+                        log.info("[{}] '{}' (ISBN: {}) already exists in database. Skipping import.", dataSource, book.getTitle(), book.getIsbn());
+                    },
+                    () -> {
+                        book.setId(null);
+                        book.setSource(dataSource);
+                        try {
+                            bookRepository.save(book);
+                            log.info("[{}] Importing '{}' (ISBN: {}) into database.", dataSource, book.getTitle(), book.getIsbn());
+                        } catch (DataIntegrityViolationException e) {
+                            log.error("[{}] Error while saving '{}' (ISBN: {}) into database: {}", dataSource, book.getTitle(), book.getIsbn(), e.getMessage());
+                        } catch (Exception e) {
+                            log.error("[{}] An unexpected error occurred during import of '{}' (ISBN: {}): {}", dataSource, book.getTitle(), book.getIsbn(), e.getMessage());
+                        }
+                    }
+            );
+        }
     }
 }

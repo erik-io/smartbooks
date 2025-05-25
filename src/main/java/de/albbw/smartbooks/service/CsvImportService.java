@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import de.albbw.smartbooks.model.Book;
+import de.albbw.smartbooks.model.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-
-import static de.albbw.smartbooks.model.DataSource.CSV;
 
 /**
  * Die Klasse CsvImportService dient zum Importieren von Büchern aus einer CSV-Datei
@@ -103,27 +102,7 @@ public class CsvImportService {
             // Jackson liest die CSV-Daten und versucht sie in Book-Objekte umzuwandeln.
             MappingIterator<Book> bookMappingIterator = csvMapper.readerFor(Book.class).with(schema).readValues(csvStream);
             List<Book> listOfBooks = bookMappingIterator.readAll(); // Liste mit allen gelesenen Buch-Objekten
-            for (Book book : listOfBooks) {
-                // Überspringe Datensätze ohne ISBN, da diese für die Duplikatsprüfung essenziell ist
-                if (book.getIsbn() == null) {
-                    System.out.println(book.getTitle() + " has no ISBN. Skipping import of book.");
-                    continue;
-                }
-
-                bookService.findByIsbn(book.getIsbn()).ifPresentOrElse(
-                        // Lambda-Ausdruck für den Fall: Buch mit der gleichen ISBN existiert bereits.
-                        existingBook -> {
-                            System.out.println("\"" + book.getTitle() + "\" (ISBN: " + book.getIsbn() + ") already exists. Skipping import of book.");
-                        },
-                        // Lambda-Ausdruck für den Fall: Das Buch ist neu.
-                        () -> {
-                            book.setId(null); // Da wir mit heterogenen Datenquellen arbeiten, setzen wir die ID auf null, damit die DB eine neue ID generiert.
-                            book.setSource(CSV); // Wir setzen die Datenquelle auf CSV
-                            bookService.saveBook(book);
-                            System.out.println("Importing " + book.getTitle() + " (ISBN: " + book.getIsbn() + ") into database.");
-                        }
-                );
-            }
+            bookService.processAndSaveImportedBooks(listOfBooks, DataSource.CSV);
         } catch (IOException e) {
             log.error("Error while reading CSV file: {}", e.getMessage());
         }
