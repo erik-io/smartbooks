@@ -1,5 +1,7 @@
 package de.albbw.smartbooks.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Das Enum ReadingStatus repräsentiert den Status des Lesevorgangs eines Buches.
  * <p>
@@ -16,7 +18,7 @@ package de.albbw.smartbooks.model;
  */
 public enum ReadingStatus {
     READING,    // Das Buch wird gerade gelesen
-    READ,       // Das Buch wurde gelesen
-    PLANNED,    // Das Buch wurde noch nicht gelesen
+    @JsonProperty("gelesen") READ,       // Das Buch wurde gelesen
+    @JsonProperty("geplant") PLANNED,    // Das Buch wurde noch nicht gelesen
     UNKNOWN     // Der Status des Buches ist unbekannt
 }
