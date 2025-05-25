@@ -17,6 +17,8 @@ public class SmartbooksApplication {
 //        JsonImportService jsonImportService = context.getBean(JsonImportService.class);
 //        jsonImportService.importJsonFile();
 
+//        XmlImportService xmlImportService = context.getBean(XmlImportService.class);
+//        xmlImportService.importXmlFile();
     }
 
 }
