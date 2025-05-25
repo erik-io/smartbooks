@@ -3,6 +3,7 @@ package de.albbw.smartbooks.service;
 import de.albbw.smartbooks.model.Book;
 import de.albbw.smartbooks.model.ReadingStatus;
 import de.albbw.smartbooks.repository.BookRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ public class BookService {
      * @return das gespeicherte Buch
      * @throws IllegalArgumentException wenn ein Buch mit der ISBN des übergebenen Buchs bereits existiert
      */
+    @Transactional
     public Book saveBook(Book book) {
         if (bookRepository.existsByIsbn(book.getIsbn())) {
             throw new IllegalArgumentException("Book with ISBN " + book.getIsbn() + " already exists.");
@@ -71,6 +73,7 @@ public class BookService {
      * @param isbn die ISBN des zu löschenden Buches
      * @throws IllegalArgumentException wenn kein Buch mit der angegebenen ISBN existiert
      */
+    @Transactional
     public void deleteBookByIsbn(String isbn) {
         Optional<Book> book = bookRepository.findByIsbn(isbn);
         if (book.isPresent()) {
@@ -89,6 +92,7 @@ public class BookService {
      * @return ein Optional, das das aktualisierte Buch enthält, wenn die Aktualisierung erfolgreich war
      * @throws IllegalArgumentException wenn kein Buch mit der angegebenen ISBN existiert
      */
+    @Transactional
     public Optional<Book> updateBook(String isbn, Book newBookInfo) {
         Optional<Book> bookOptional = bookRepository.findByIsbn(isbn); // Wir schauen, ob das Buch in der Datenbank vorhanden ist
 
@@ -132,5 +136,16 @@ public class BookService {
      */
     public List<Book> findBooksByGenre(String genre) {
         return bookRepository.findByGenre(genre);
+    }
+
+
+    /**
+     * Findet alle Bücher, die von einem bestimmten Autor geschrieben wurden.
+     *
+     * @param author der Autor, nach dem die Bücher gefiltert werden sollen
+     * @return eine Liste von Büchern, die von dem angegebenen Autor geschrieben wurden
+     */
+    public List<Book> findBooksByAuthor(String author) {
+        return bookRepository.findByAuthor(author);
     }
 }

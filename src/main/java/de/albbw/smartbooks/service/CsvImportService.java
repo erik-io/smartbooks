@@ -54,7 +54,7 @@ import static de.albbw.smartbooks.model.DataSource.CSV;
 public class CsvImportService {
     private final BookService bookService;
     private final String CSV_FILE_PATH = "/Buecher.csv";
-    
+
     @Autowired
     public CsvImportService(BookService bookService) {
         this.bookService = bookService;

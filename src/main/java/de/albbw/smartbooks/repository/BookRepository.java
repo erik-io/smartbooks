@@ -9,26 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Repository-Schnittstelle für den Zugriff auf und die Verwaltung von {@link Book}-Entitäten in der Datenbank.
- * <p>
- * Diese Schnittstelle erweitert {@link org.springframework.data.jpa.repository.JpaRepository JpaRepository},
- * wodurch sie automatisch eine umfassende Menge an Standardmethoden für CRUD-Operationen (Create, Read, Update, Delete)
- * sowie Paginierungs- und Sortierfunktionalitäten erbt. Es ist also nicht notwendig, Methoden wie
- * {@code save()}, {@code findById()}, {@code findAll()}, {@code deleteById()} etc. explizit zu deklarieren.
- *
- * <p>Einige der wichtigsten automatisch bereitgestellten Methoden umfassen:
- * <ul>
- * <li>{@code <S extends Book> S save(S entity)} zum Speichern oder Aktualisieren eines Buches.</li>
- * <li>{@code Optional<Book> findById(Long id)} zum Abrufen eines Buches anhand seiner ID.</li>
- * <li>{@code List<Book> findAll()} zum Abrufen aller Bücher.</li>
- * <li>{@code void deleteById(Long id)} zum Löschen eines Buches anhand seiner ID.</li>
- * <li>{@code long count()} zur Ermittlung der Gesamtzahl der Bücher.</li>
- * <li>{@code boolean existsById(Long id)} zur Überprüfung, ob ein Buch mit einer bestimmten ID existiert.</li>
- * </ul>
- * <p>
- * Zusätzlich zu diesen geerbten Methoden können hier spezifische, benutzerdefinierte Abfragemethoden
- * (wie {@code findByIsbn} oder {@code existsByIsbn}) definiert werden. Spring Data JPA generiert
- * die Implementierung für diese Methoden automatisch basierend auf ihren Namen.
+ * Das BookRepository ist ein Repository-Interface, das die Datenzugriffslogik
+ * für die Entität Book bereitstellt. Es erweitert JpaRepository und bietet Methoden
+ * für CRUD-Operationen sowie benutzerdefinierte Abfragen.
  */
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
@@ -72,5 +55,13 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      */
     List<Book> findByStatus(ReadingStatus status);
 
-    // List<Book> findByAuthor(String author);
+
+    /**
+     * Sucht alle Bücher, die von einem bestimmten Autor verfasst wurden.
+     *
+     * @param author der Name des Autors, nach dem die Bücher gefiltert werden sollen
+     * @return eine Liste von Büchern, die von dem angegebenen Autor verfasst wurden;
+     * gibt eine leere Liste zurück, wenn keine Bücher gefunden werden
+     */
+    List<Book> findByAuthor(String author);
 }

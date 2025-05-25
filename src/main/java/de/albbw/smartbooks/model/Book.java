@@ -1,5 +1,6 @@
 package de.albbw.smartbooks.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,8 +33,10 @@ public class Book {
     private String isbn;
 
     @Column(nullable = false)
+    @JsonProperty("titel")
     private String title;
 
+    @JsonProperty("autor")
     private String author;
     private String genre;
     private Integer publicationYear; // Integer statt int, um null zuzulassen
