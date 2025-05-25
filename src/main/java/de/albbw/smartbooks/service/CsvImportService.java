@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import de.albbw.smartbooks.model.Book;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -50,6 +51,7 @@ import static de.albbw.smartbooks.model.DataSource.CSV;
  * - Bücher, die von unterschiedlichen Datenquellen importiert werden, erhalten
  * eine neue ID, um Konflikte zu vermeiden.
  */
+@Slf4j
 @Service
 public class CsvImportService {
     private final BookService bookService;
@@ -123,8 +125,7 @@ public class CsvImportService {
                 );
             }
         } catch (IOException e) {
-            System.err.println("Error while reading CSV file: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error while reading CSV file: {}", e.getMessage());
         }
 
     }

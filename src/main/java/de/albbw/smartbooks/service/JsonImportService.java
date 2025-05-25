@@ -3,6 +3,7 @@ package de.albbw.smartbooks.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.albbw.smartbooks.model.Book;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import static de.albbw.smartbooks.model.DataSource.JSON;
  * - Bücher ohne ISBN werden nicht importiert.
  * - Der JSON-Importpfad ist auf "/Buecher.json" festgelegt.
  */
+@Slf4j
 @Service
 public class JsonImportService {
     private final BookService bookService;
@@ -104,12 +106,10 @@ public class JsonImportService {
                 );
             }
         } catch (IOException e) {
-            System.err.println("Error while reading JSON file: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error while reading JSON file: {}", e.getMessage());
         } catch (Exception e) {
             // Falls andere unerwartete Fehler während des Imports auftreten
-            System.err.println("An unexpected error occurred during JSON import: " + e.getMessage());
-            e.printStackTrace();
+            log.error("An unexpected error occurred during JSON import: {}", e.getMessage());
         }
     }
 }
