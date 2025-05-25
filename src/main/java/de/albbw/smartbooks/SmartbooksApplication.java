@@ -1,6 +1,6 @@
 package de.albbw.smartbooks;
 
-import de.albbw.smartbooks.service.CsvImportService;
+import de.albbw.smartbooks.service.JsonImportService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -9,11 +9,16 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class SmartbooksApplication {
 
     public static void main(String[] args) {
-        // SpringApplication.run(SmartbooksApplication.class, args);
+//        SpringApplication.run(SmartbooksApplication.class, args);
 
         ConfigurableApplicationContext context = SpringApplication.run(SmartbooksApplication.class, args);
-        CsvImportService csvImportService = context.getBean(CsvImportService.class);
-        csvImportService.importCsvFile();
+
+//        CsvImportService csvImportService = context.getBean(CsvImportService.class);
+//        csvImportService.importCsvFile();
+
+        JsonImportService jsonImportService = context.getBean(JsonImportService.class);
+        jsonImportService.importJsonFile();
+
     }
 
 }
