@@ -1,0 +1,20 @@
+{
+  "buecher": [
+    {
+      "id": 101,
+      "titel": "QualityLand",
+      "autor": "Marc-Uwe Kling",
+      "genre": "Dystopie",
+      "isbn": "9783548291955",
+      "status": "geplant"
+    },
+    {
+      "id": 102,
+      "titel": "Der Schwarm",
+      "autor": "Frank Schätzing",
+      "genre": "Thriller",
+      "isbn": "9783462035713",
+      "status": "gelesen"
+    }
+  ]
+}

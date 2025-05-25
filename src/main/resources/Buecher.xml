@@ -1,0 +1,18 @@
+<buecherliste>
+  <buch>
+    <id>201</id>
+    <titel>Tschick</titel>
+    <autor>Wolfgang Herrndorf</autor>
+    <genre>Roman</genre>
+    <isbn>9783463406467</isbn>
+    <status>gelesen</status>
+  </buch>
+  <buch>
+    <id>202</id>
+    <titel>Corpus Delicti</titel>
+    <autor>Juli Zeh</autor>
+    <genre>Dystopie</genre>
+    <isbn>9783446236442</isbn>
+    <status>geplant</status>
+  </buch>
+</buecherliste>
