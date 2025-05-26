@@ -1,5 +1,7 @@
 package de.albbw.smartbooks.model;
 
+import lombok.Getter;
+
 /**
  * Das Enum DataSource repräsentiert verschiedene Arten von Datenquellen,
  * die genutzt werden können, um Informationen zu beziehen.
@@ -13,10 +15,17 @@ package de.albbw.smartbooks.model;
  * <li>UNKNOWN: Die Datenquelle ist unbekannt oder nicht spezifiziert.</li>
  * </ul>
  */
+@Getter
 public enum DataSource {
-    CSV,
-    JSON,
-    XML,
-    API,
-    UNKNOWN
+    CSV("CSV-Datei"),
+    JSON("JSON-Datei"),
+    XML("XML-Datei"),
+    API("API"),
+    UNKNOWN("Unbekannt");
+
+    private final String label;
+
+    DataSource(String label) {
+        this.label = label;
+    }
 }

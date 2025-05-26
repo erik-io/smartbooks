@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bücherliste</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>Alle Bücher</h1>
+<div th:if="${books.isEmpty()}">
+    <p>Keine Bücher in der Datenbank vorhanden.</p>
+</div>
+<table th:unless="${books.isEmpty()}">
+    <thead>
+    <tr>
+        <th>Titel</th>
+        <th>Autor</th>
+        <th>ISBN</th>
+        <th>Genre</th>
+        <th>Status</th>
+        <th>Quelle</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="book : ${books}">
+        <td th:text="${book.title}"></td>
+        <td th:text="${book.author}"></td>
+        <td th:text="${book.isbn}"></td>
+        <td th:text="${book.genre}"></td>
+        <td th:text="${book.status.label}"></td>
+        <td th:text="${book.source.label}"></td>
+    </tbody>
+</table>
+</body>
+</html>
