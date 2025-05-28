@@ -5,7 +5,6 @@ import de.albbw.smartbooks.model.Book;
 import de.albbw.smartbooks.model.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,20 +15,15 @@ import java.util.List;
 @Slf4j
 public class XmlImportService {
     private final BookService bookService;
-    private final String XML_FILE_PATH = "/Buecher.xml";
 
     @Autowired
     XmlImportService(BookService bookService) {
         this.bookService = bookService;
     }
 
-    public void importXmlFile() {
+    public void importXmlFile(InputStream xmlStream) throws IOException {
         XmlMapper xmlMapper = new XmlMapper();
-        try (InputStream xmlStream = new ClassPathResource(XML_FILE_PATH).getInputStream()) {
-            List<Book> listOfBooks = xmlMapper.readValue(xmlStream, xmlMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
-            bookService.processAndSaveImportedBooks(listOfBooks, DataSource.XML);
-        } catch (IOException e) {
-            log.error("Error while reading XML file: {}", e.getMessage());
-        }
+        List<Book> listOfBooks = xmlMapper.readValue(xmlStream, xmlMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
+        bookService.processAndSaveImportedBooks(listOfBooks, DataSource.XML);
     }
 }

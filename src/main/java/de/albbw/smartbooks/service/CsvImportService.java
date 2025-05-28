@@ -54,7 +54,6 @@ import java.util.List;
 @Service
 public class CsvImportService {
     private final BookService bookService;
-    private final String CSV_FILE_PATH = "/Buecher.csv";
 
     @Autowired
     public CsvImportService(BookService bookService) {
@@ -89,7 +88,7 @@ public class CsvImportService {
      * - Duplikate werden durch die Überprüfung der ISBN ermittelt.
      * - Die ID des Buches wird vor dem Speichern zurückgesetzt, um sicherzustellen, dass die Datenbank eine neue ID generiert.
      */
-    public void importCsvFile() {
+    public void importCsvFile(InputStream csvStream) throws IOException {
         CsvMapper csvMapper = new CsvMapper(); // Jackson-Objekt zum Lesen von CSV-Dateien
 
         // Schema für die CSV-Datei definieren
@@ -97,15 +96,10 @@ public class CsvImportService {
         // - mit Komma als Trennzeichen (withColumnSeparator(','))
         CsvSchema schema = CsvSchema.emptySchema().withHeader().withColumnSeparator(',');
 
-        // try-with-resources, um den InputStream sicher zu schließen
-        try (InputStream csvStream = new ClassPathResource(CSV_FILE_PATH).getInputStream()) {
-            // Jackson liest die CSV-Daten und versucht sie in Book-Objekte umzuwandeln.
-            MappingIterator<Book> bookMappingIterator = csvMapper.readerFor(Book.class).with(schema).readValues(csvStream);
-            List<Book> listOfBooks = bookMappingIterator.readAll(); // Liste mit allen gelesenen Buch-Objekten
-            bookService.processAndSaveImportedBooks(listOfBooks, DataSource.CSV);
-        } catch (IOException e) {
-            log.error("Error while reading CSV file: {}", e.getMessage());
-        }
-
+        // Kein try-with-resources für den übergebenen Stream, wenn der Controller den Stream öffnet und hier übergibt.
+        // Sicherer ist oft, wenn der Controller den Stream öffnet und schließt.
+        MappingIterator<Book> bookMappingIterator = csvMapper.readerFor(Book.class).with(schema).readValues(csvStream);
+        List<Book> listOfBooks = bookMappingIterator.readAll(); // Liste mit allen gelesenen Buch-Objekten
+        bookService.processAndSaveImportedBooks(listOfBooks, DataSource.CSV);
     }
 }

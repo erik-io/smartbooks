@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.albbw.smartbooks.model.Book;
 import de.albbw.smartbooks.model.DataSource;
+import de.albbw.smartbooks.model.ReadingStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -42,7 +42,6 @@ import java.util.List;
 @Service
 public class JsonImportService {
     private final BookService bookService;
-    private final String JSON_FILE_PATH = "/Buecher.json"; // Dateipfad zur JSON-Datei im Classpath (src/main/resources)
 
     @Autowired
     public JsonImportService(BookService bookService) {
@@ -73,25 +72,24 @@ public class JsonImportService {
      * Pfad zur JSON-Datei:
      * - Die Datei wird aus dem Klassenpfad unter dem festgelegten Pfad "/Buecher.json" geladen.
      */
-    public void importJsonFile() {
+    public void importJsonFile(InputStream jsonStream) throws IOException {
         ObjectMapper jsonMapper = new ObjectMapper(); // Äquivalent zum CsvMapper für JSON
 
-        try (InputStream jsonStream = new ClassPathResource(JSON_FILE_PATH).getInputStream()) {
-            // Liest die gesamte JSON-Struktur als Baum von JsonNode-Objekten ein.
-            // Aufbau der JSON-Datenstruktur: { "buecher": [{...}, {...}, ...]" }
-            JsonNode rootNode = jsonMapper.readTree(jsonStream);
-            JsonNode booksNode = rootNode.path("buecher"); // Navigiert zum "buecher"-Array innerhalb des JSON-Dokuments.
+        // Liest die gesamte JSON-Struktur als Baum von JsonNode-Objekten ein.
+        // Aufbau der JSON-Datenstruktur: { "buecher": [{...}, {...}, ...]" }
+        JsonNode rootNode = jsonMapper.readTree(jsonStream);
+        JsonNode booksNode = rootNode.path("buecher"); // Navigiert zum "buecher"-Array innerhalb des JSON-Dokuments.
 
-            // Konvertiert den JsonNode in eine Liste von Buch-Objekten.
-            // jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class) erstellt die notwendige Typinformation (List<Book>) für Jackson.
-            List<Book> listOfBooks = jsonMapper.treeToValue(booksNode, jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
+        // Konvertiert den JsonNode in eine Liste von Buch-Objekten.
+        // jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class) erstellt die notwendige Typinformation (List<Book>) für Jackson.
+        List<Book> listOfBooks = jsonMapper.treeToValue(booksNode, jsonMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
 
-            bookService.processAndSaveImportedBooks(listOfBooks, DataSource.JSON);
-        } catch (IOException e) {
-            log.error("Error while reading JSON file: {}", e.getMessage());
-        } catch (Exception e) {
-            // Falls andere unerwartete Fehler während des Imports auftreten
-            log.error("An unexpected error occurred during JSON import: {}", e.getMessage());
+        for (Book book : listOfBooks) {
+            if (book.getStatus() == null) {
+                book.setStatus(ReadingStatus.UNKNOWN); // Standardwert setzen
+            }
         }
+        bookService.processAndSaveImportedBooks(listOfBooks, DataSource.JSON);
+
     }
 }

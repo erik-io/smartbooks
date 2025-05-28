@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Bücherliste</title>
@@ -47,5 +47,30 @@
         <td th:text="${book.source.label}"></td>
     </tbody>
 </table>
+<hr/>
+<h2>Bücher importieren</h2>
+<form enctype="multipart/form-data" method="post" th:action="@{/web/books/upload}">
+    <div>
+        <label for="file">Datei auswählen;</label>
+        <input accept="text/csv, application/json, application/xml" id="file" name="file" required
+               type="file">
+    </div>
+    <div>
+        <label for="fileType">Dateityp:</label>
+        <select id="fileType" name="fileType">
+            <option value="csv">CSV</option>
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+        </select>
+    </div>
+    <div>
+        <button type="submit">Importieren</button>
+    </div>
+</form>
+
+<div th:classappend="${uploadStatus == 'SUCCESS'} ? 'message-success' : 'message-error'" th:if="${uploadMessage}"
+     th:text="${uploadMessage}">
+</div>
+
 </body>
 </html>
