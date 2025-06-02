@@ -45,35 +45,54 @@ public class BookWebController {
     }
 
     @PostMapping("/upload")
-    public String handleFileUpload(@RequestParam("file") MultipartFile file,
-                                   @RequestParam("fileType") String fileType,
-                                   RedirectAttributes redirectAttributes) {
+    public String handleFileUpload(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
         if (file.isEmpty()) {
             redirectAttributes.addFlashAttribute("uploadMessage", "Please select a file to upload");
             redirectAttributes.addFlashAttribute("uploadStatus", "ERROR");
             return "redirect:/web/books/list";
         }
 
+        String fileName = file.getOriginalFilename();
+        String fileType = null;
+
+        if (fileName != null) {
+            if (fileName.toLowerCase().endsWith(".csv")) {
+                fileType = "csv";
+            }
+            else if (fileName.toLowerCase().endsWith(".json")) {
+                fileType = "json";
+            }
+            else if (fileName.toLowerCase().endsWith(".xml")) {
+                fileType = "xml";
+            }
+            else {
+                redirectAttributes.addFlashAttribute("uploadMessage", "Invalid file type");
+                redirectAttributes.addFlashAttribute("uploadStatus", "ERROR");
+            }
+        }
+
         try {
             InputStream inputStream = file.getInputStream();
 
-            switch (fileType.toLowerCase()) {
-                case "csv":
-                    log.info("Importing CSV file...");
-                    csvImportService.importCsvFile(inputStream);
-                    break;
-                case "json":
-                    log.info("Importing JSON file...");
-                    jsonImportService.importJsonFile(inputStream);
-                    break;
-                case "xml":
-                    log.info("Importing XML file...");
-                    xmlImportService.importXmlFile(inputStream);
-                    break;
-                default:
-                    redirectAttributes.addFlashAttribute("uploadMessage", "Invalid file type");
-                    redirectAttributes.addFlashAttribute("uploadStatus", "ERROR");
-                    return "redirect:/web/books/list";
+            if (fileType != null) {
+                switch (fileType.toLowerCase()) {
+                    case "csv":
+                        log.info("Importing CSV file...");
+                        csvImportService.importCsvFile(inputStream);
+                        break;
+                    case "json":
+                        log.info("Importing JSON file...");
+                        jsonImportService.importJsonFile(inputStream);
+                        break;
+                    case "xml":
+                        log.info("Importing XML file...");
+                        xmlImportService.importXmlFile(inputStream);
+                        break;
+                    default:
+                        redirectAttributes.addFlashAttribute("uploadMessage", "Invalid file type");
+                        redirectAttributes.addFlashAttribute("uploadStatus", "ERROR");
+                        return "redirect:/web/books/list";
+                }
             }
 
             inputStream.close();

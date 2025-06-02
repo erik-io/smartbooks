@@ -11,6 +11,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * Service-Klasse, die für den Import von XML-Dateien verantwortlich ist.
+ * Die importierten Daten werden in eine Liste von Büchern konvertiert und anschließend
+ * durch den {@link BookService} verarbeitet und gespeichert.
+ */
 @Service
 @Slf4j
 public class XmlImportService {
@@ -23,6 +28,8 @@ public class XmlImportService {
 
     public void importXmlFile(InputStream xmlStream) throws IOException {
         XmlMapper xmlMapper = new XmlMapper();
+        
+        // Mit `TypeFactory` und `constructCollectionType` wird festgelegt, dass der XML-Mapper die XML-Daten in eine Liste konvertiert, deren Elemente vom Typ Book sind.
         List<Book> listOfBooks = xmlMapper.readValue(xmlStream, xmlMapper.getTypeFactory().constructCollectionType(List.class, Book.class));
         bookService.processAndSaveImportedBooks(listOfBooks, DataSource.XML);
     }
