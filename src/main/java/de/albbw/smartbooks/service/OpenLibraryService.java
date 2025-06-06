@@ -26,7 +26,7 @@ public class OpenLibraryService {
     public Optional<Book> fetchBookDetails(String isbn) {
         try {
             String jsonResponse = restClient.get()
-                    .uri("/books?bibkeys=ISBN:{isbn}&jscmd=data&format=json")
+                    .uri("/books?bibkeys=ISBN:{isbn}&jscmd=data&format=json", isbn)
                     .retrieve()
                     .body(String.class);
 
