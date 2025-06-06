@@ -6,7 +6,6 @@ import de.albbw.smartbooks.model.ReadingStatus;
 import de.albbw.smartbooks.repository.BookRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,6 @@ public class BookService {
     private final BookRepository bookRepository;
     private final OpenLibraryService openLibraryService;
 
-    @Autowired
     public BookService(BookRepository bookRepository, OpenLibraryService openLibraryService) {
         this.bookRepository = bookRepository;
         this.openLibraryService = openLibraryService;
