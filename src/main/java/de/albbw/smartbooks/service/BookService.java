@@ -214,9 +214,9 @@ public class BookService {
 
     @Transactional
     public Book fetchAndUpdateBookFromApi(String isbn) {
-        Book localBook = bookRepository.findByIsbn(isbn).orElseThrow();
+        Book localBook = bookRepository.findByIsbn(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not in database."));
 
-        Book apiBookData = openLibraryService.fetchBookDetails(isbn).orElseThrow();
+        Book apiBookData = openLibraryService.fetchBookDetails(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not found on OpenLibrary."));
 
         localBook.setAuthor(apiBookData.getAuthor());
         localBook.setTitle(apiBookData.getTitle());

@@ -40,7 +40,7 @@ public class OpenLibraryService {
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
             JsonNode bookNode = rootNode.path("ISBN:" + isbn);
 
-            if (bookNode == null) {
+            if (bookNode.isMissingNode() || bookNode.isNull() || !bookNode.isObject() || bookNode.size() == 0) {
                 log.warn("No book found in Open Library API for ISBN {}", isbn);
                 return Optional.empty();
             }
