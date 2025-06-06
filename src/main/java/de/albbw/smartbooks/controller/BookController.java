@@ -131,4 +131,16 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred while deleting the book.");
         }
     }
+
+    @PostMapping("/{isbn}/fetch-api-data")
+    public ResponseEntity<?> fetchAndUpdateBook(@PathVariable String isbn) {
+        try {
+            Book updatedBook = bookService.fetchAndUpdateBookFromApi(isbn);
+            return ResponseEntity.ok(updatedBook); // 200 OK
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404 NOT FOUND
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred while fetching and updating the book. " + e.getMessage()); // 500 INTERNAL SERVER ERROR
+        }
+    }
 }

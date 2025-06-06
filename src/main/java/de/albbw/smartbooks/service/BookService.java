@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,10 +30,12 @@ import java.util.Optional;
 @Slf4j
 public class BookService {
     private final BookRepository bookRepository;
+    private final OpenLibraryService openLibraryService;
 
     @Autowired
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, OpenLibraryService openLibraryService) {
         this.bookRepository = bookRepository;
+        this.openLibraryService = openLibraryService;
     }
 
     /**
@@ -207,5 +210,26 @@ public class BookService {
                     }
             );
         }
+    }
+
+    @Transactional
+    public Book fetchAndUpdateBookFromApi(String isbn) {
+        Book localBook = bookRepository.findByIsbn(isbn).orElseThrow();
+
+        Book apiBookData = openLibraryService.fetchBookDetails(isbn).orElseThrow();
+
+        localBook.setAuthor(apiBookData.getAuthor());
+        localBook.setTitle(apiBookData.getTitle());
+        localBook.setPublicationYear(apiBookData.getPublicationYear());
+        localBook.setPublisher(apiBookData.getPublisher());
+        localBook.setPageCount(apiBookData.getPageCount());
+        localBook.setCoverImageUrl(apiBookData.getCoverImageUrl());
+
+        localBook.setApiCheckTimestamp(LocalDateTime.now());
+
+        Book updatedBook = bookRepository.save(localBook);
+        log.info("{} (ISBN: {}) successfully updated with data from OpenLibrary.", updatedBook.getTitle(), updatedBook.getIsbn());
+
+        return updatedBook;
     }
 }
