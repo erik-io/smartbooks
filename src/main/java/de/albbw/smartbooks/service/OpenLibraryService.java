@@ -40,7 +40,7 @@ public class OpenLibraryService {
             JsonNode rootNode = objectMapper.readTree(jsonResponse);
             JsonNode bookNode = rootNode.path("ISBN:" + isbn);
 
-            if (bookNode.isMissingNode() || bookNode.isNull() || !bookNode.isObject() || bookNode.size() == 0) {
+            if (bookNode.isMissingNode() || bookNode.isNull() || !bookNode.isObject() || bookNode.isEmpty()) {
                 log.warn("No book found in Open Library API for ISBN {}", isbn);
                 return Optional.empty();
             }
@@ -48,7 +48,7 @@ public class OpenLibraryService {
             Book book = new Book();
             book.setAuthor(extractFirstFromArray(bookNode, "authors"));
             book.setTitle(bookNode.get("title").asText());
-            book.setPublicationYear(bookNode.has("publish_date") ? bookNode.get("publish_date").asInt() : null);
+            book.setPublicationYear(bookNode.has("publish_date") ? Integer.parseInt(bookNode.get("publish_date").asText().substring(0, 4)) : null);
             book.setPublisher(extractFirstFromArray(bookNode, "publishers"));
             book.setPageCount(bookNode.has("number_of_pages") ? bookNode.get("number_of_pages").asInt() : null);
 
