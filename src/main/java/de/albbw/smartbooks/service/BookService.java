@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -221,27 +222,67 @@ public class BookService {
      */
     @Transactional
     public Book fetchAndUpdateBookFromApi(String isbn) {
-        // Zuerst suchen wir das Buch in der lokalen Datenbank
+        // Zuerst suchen wir das Buch in der lokalen Datenbank oder lösen eine Ausnahme aus
         Book localBook = bookRepository.findByIsbn(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not in database."));
 
-        // Dann rufen wir die Daten von der OpenLibrary API ab
-        Book apiBookData = openLibraryService.fetchBookDetails(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not found on OpenLibrary."));
-
-        // Wir aktualisieren das Buch mit den neuen Daten
-        localBook.setAuthor(apiBookData.getAuthor());
-        localBook.setTitle(apiBookData.getTitle());
-        localBook.setPublicationYear(apiBookData.getPublicationYear());
-        localBook.setPublisher(apiBookData.getPublisher());
-        localBook.setPageCount(apiBookData.getPageCount());
-        localBook.setCoverImageUrl(apiBookData.getCoverImageUrl());
-
-        // Wir setzen einen Zeitstempel für die API-Überprüfung
+        // Wir setzen einen Zeitstempel für die API-Überprüfung sofort
         localBook.setApiCheckTimestamp(LocalDateTime.now());
 
-        // Das aktualisierte Buch wird in der Datenbank gespeichert
-        Book updatedBook = bookRepository.save(localBook);
-        log.info("{} (ISBN: {}) successfully updated with data from OpenLibrary.", updatedBook.getTitle(), updatedBook.getIsbn());
+        Optional<Book> apiBookDataOptional = openLibraryService.fetchBookDetails(isbn);
 
-        return updatedBook;
+        if (apiBookDataOptional.isEmpty()) {
+            log.warn("Book with ISBN {} not found on OpenLibrary. Only updating check timestamp", isbn);
+            return bookRepository.save(localBook);
+        }
+
+        Book apiBookData = apiBookDataOptional.get();
+        boolean dataChanged = false;
+
+        // Wir vergleichen die Felder und aktualisieren nur bei Änderungen
+
+        // Wir aktualisieren das Buch mit den neuen Daten
+        if (apiBookData.getTitle() != null && !Objects.equals(localBook.getTitle(), apiBookData.getTitle())) {
+            localBook.setTitle(apiBookData.getTitle());
+            dataChanged = true;
+        }
+
+        if (apiBookData.getAuthor() != null && !Objects.equals(localBook.getAuthor(), apiBookData.getAuthor())) {
+            localBook.setAuthor(apiBookData.getAuthor());
+            dataChanged = true;
+        }
+
+        if (apiBookData.getTitle() != null && !Objects.equals(localBook.getTitle(), apiBookData.getTitle())) {
+            localBook.setTitle(apiBookData.getTitle());
+            dataChanged = true;
+        }
+
+        if (apiBookData.getPublicationYear() != null && !Objects.equals(localBook.getPublicationYear(), apiBookData.getPublicationYear())) {
+            localBook.setPublicationYear(apiBookData.getPublicationYear());
+            dataChanged = true;
+        }
+
+        if (apiBookData.getPublisher() != null && !Objects.equals(localBook.getPublisher(), apiBookData.getPublisher())) {
+            localBook.setPublisher(apiBookData.getPublisher());
+            dataChanged = true;
+        }
+
+        // Bei Seitenzahl prüfen wir > 0, da die API manchmal 0 als Standardwert liefert.
+        if (apiBookData.getPageCount() != null && apiBookData.getPageCount() > 0 && !Objects.equals(localBook.getPageCount(), apiBookData.getPageCount())) {
+            localBook.setPageCount(apiBookData.getPageCount());
+            dataChanged = true;
+        }
+
+        if (apiBookData.getCoverImageUrl() != null && !Objects.equals(localBook.getCoverImageUrl(), apiBookData.getCoverImageUrl())) {
+            localBook.setCoverImageUrl(apiBookData.getCoverImageUrl());
+        }
+
+        if (dataChanged) {
+            localBook.setApiDataUpdateTimestamp(LocalDateTime.now());
+            log.info("{} (ISBN: {}) successfully updated with data from OpenLibrary.", localBook.getTitle(), localBook.getIsbn());
+        } else {
+            log.info("Data for {} (ISBN: {}) is already up-to-date. No changes made.", localBook.getTitle(), localBook.getIsbn());
+        }
+
+        return bookRepository.save(localBook);
     }
 }
