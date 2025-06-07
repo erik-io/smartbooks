@@ -132,6 +132,16 @@ public class BookController {
         }
     }
 
+    /**
+     * Ruft Buchdaten von einer externen API ab und aktualisiert das Buch in der Datenbank basierend auf der angegebenen ISBN.
+     * Gibt die aktualisierten Buchdaten oder entsprechende Fehlerinformationen zurück.
+     *
+     * @param isbn Die ISBN des Buches, dessen Daten abgefragt und aktualisiert werden sollen.
+     * @return Eine ResponseEntity mit folgendem Inhalt:
+     * - HTTP 200 (OK): Wenn das Buch erfolgreich aktualisiert wurde. Enthält die aktualisierten Buchdaten.
+     * - HTTP 404 (NOT FOUND): Wenn kein Buch mit der angegebenen ISBN gefunden wurde.
+     * - HTTP 500 (INTERNAL SERVER ERROR): Wenn ein unerwarteter Fehler auftritt.
+     */
     @PostMapping("/{isbn}/fetch-api-data")
     public ResponseEntity<?> fetchAndUpdateBook(@PathVariable String isbn) {
         try {

@@ -210,12 +210,24 @@ public class BookService {
         }
     }
 
+    /**
+     * Ruft Buchdetails von einer externen API (OpenLibrary) ab, aktualisiert diese
+     * für das lokale Buch im Repository und speichert die Änderungen.
+     *
+     * @param isbn Die ISBN des Buches, das abgerufen und aktualisiert werden soll.
+     * @return Das aktualisierte Buchobjekt aus dem Repository.
+     * @throws IllegalArgumentException Wenn das Buch mit der angegebenen ISBN nicht
+     *                                  in der lokalen Datenbank oder nicht in der OpenLibrary gefunden wird.
+     */
     @Transactional
     public Book fetchAndUpdateBookFromApi(String isbn) {
+        // Zuerst suchen wir das Buch in der lokalen Datenbank
         Book localBook = bookRepository.findByIsbn(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not in database."));
 
+        // Dann rufen wir die Daten von der OpenLibrary API ab
         Book apiBookData = openLibraryService.fetchBookDetails(isbn).orElseThrow(() -> new IllegalArgumentException("Book with ISBN " + isbn + " not found on OpenLibrary."));
 
+        // Wir aktualisieren das Buch mit den neuen Daten
         localBook.setAuthor(apiBookData.getAuthor());
         localBook.setTitle(apiBookData.getTitle());
         localBook.setPublicationYear(apiBookData.getPublicationYear());
@@ -223,8 +235,10 @@ public class BookService {
         localBook.setPageCount(apiBookData.getPageCount());
         localBook.setCoverImageUrl(apiBookData.getCoverImageUrl());
 
+        // Wir setzen einen Zeitstempel für die API-Überprüfung
         localBook.setApiCheckTimestamp(LocalDateTime.now());
 
+        // Das aktualisierte Buch wird in der Datenbank gespeichert
         Book updatedBook = bookRepository.save(localBook);
         log.info("{} (ISBN: {}) successfully updated with data from OpenLibrary.", updatedBook.getTitle(), updatedBook.getIsbn());
 
