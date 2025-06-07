@@ -9,11 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -32,15 +31,22 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class OpenLibraryService {
+    // List mit Standard-Datumformaten. 'uuuu' ist robuster für Jahre als 'yyyy'
     private static final List<DateTimeFormatter> DATE_TIME_FORMATTERS = List.of(
-            DateTimeFormatter.ofPattern("dd.MM.yyyy"), // Für "29.03.2019"
-            DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH), // Für "Jun 15, 2012"
-            DateTimeFormatter.ofPattern("yyyy-MM"),           // Für "1998-10"
-            DateTimeFormatter.ofPattern("yyyy")               // Für "2009"
+            DateTimeFormatter.ofPattern("dd.MM.uuuu"), // Für "29.03.2019"
+            DateTimeFormatter.ofPattern("MMM d, uuuu", Locale.ENGLISH), // Für "Jun 15, 2012"
+            DateTimeFormatter.ofPattern("uuuu-MM"),           // Für "1998-10"
+            DateTimeFormatter.ofPattern("uuuu")               // Für "2009"
     );
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
 
+    /*
+     Regex als Fallback
+     1. Erfassungsgruppe (\d{4})
+     \d entspricht einer Ziffer (äquivalent zu [0-9])
+     {4} findet das vorherige Token genau 4 Mal
+    */
     private final Pattern yearPattern = Pattern.compile("(\\d{4})");
 
     @Autowired
@@ -65,29 +71,29 @@ public class OpenLibraryService {
 
         for (DateTimeFormatter formatter : DATE_TIME_FORMATTERS) {
             try {
-                if (formatter.toString().contains("d)")) {
-                    return LocalDate.parse(dateStr, formatter).getYear();
-                } else if (formatter.toString().contains("M")) {
-                    return YearMonth.parse(dateStr, formatter).getYear();
-                } else {
-                    return Year.parse(dateStr, formatter).getValue();
+                // Diese Methode soll robuster sein und universell für alle Formate
+                TemporalAccessor dateElements = formatter.parse(dateStr);
+                if (dateElements.isSupported(ChronoField.YEAR)) {
+                    return dateElements.get(ChronoField.YEAR);
                 }
             } catch (DateTimeParseException ignored) {
-
-            }
-
-            log.warn("Could not parse date string {} with standard formats. Falling back to regex.", dateStr);
-            Matcher matcher = yearPattern.matcher(dateStr);
-            if (matcher.find()) {
-                try {
-                    return Integer.parseInt(matcher.group(1));
-                } catch (NumberFormatException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                log.warn("Could not find year in date string {} with regex.", dateStr);
+                // Ignorieren und nächstes Format versuchen
             }
         }
+        
+        // Fallback: Wenn wir das Datum nicht parsen können, versuchen wir es mit Regex
+        log.warn("Could not parse date string {} with standard formats. Falling back to regex.", dateStr);
+        Matcher matcher = yearPattern.matcher(dateStr);
+        if (matcher.find()) {
+            try {
+                return Integer.parseInt(matcher.group(1));
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            log.warn("Could not find year in date string {} with regex.", dateStr);
+        }
+
         log.warn("Could not extract a year from date string: '{}'", dateStr);
         return 0;
     }
